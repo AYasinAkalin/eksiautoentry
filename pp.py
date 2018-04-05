@@ -70,7 +70,7 @@ def main():
     html_of_header = str(r.read())
     html_of_header = html_of_header.decode('utf-8')
     page_count = html_of_header.find('data-pagecount')
-    if page_count is not -1:
+    if page_count is -1:
         # entry adding occurs here
         check_first_entry(html_of_header,browser)
         check_if_entry_is_given(html_of_header, user_data,browser)
