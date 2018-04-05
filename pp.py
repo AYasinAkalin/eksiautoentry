@@ -70,7 +70,7 @@ def main():
     html_of_header = str(r.read())
     html_of_header = html_of_header.decode('utf-8')
     page_count = html_of_header.find('data-pagecount')
-    if page_count is -1:
+    if page_count is not -1:
         # entry adding occurs here
         check_first_entry(html_of_header,browser)
         check_if_entry_is_given(html_of_header, user_data,browser)
@@ -79,7 +79,7 @@ def main():
     else:
         print('No entry deletion occurred. Exiting...')
         browser.close()
-        sys.exit(-1)
+        sys.exit(1)
 #    html_of_header = html_of_header[page_count:]
 #    _id = re.findall('pagecount="(.*?)"', html_of_header)
 #    page_count = int(_id[0])
@@ -89,24 +89,26 @@ def main():
 
 
 def check_if_entry_is_given(response_html, user_data, browser):
-    real_find_string = user_data.entry;
-    real_find_string.replace("\n", "<br/>")
+    real_find_string = user_data.entry
+    real_find_string = real_find_string.replace(">","&gt;")
+    real_find_string = real_find_string.replace("<","&lt;")
+    real_find_string = real_find_string.replace("\n", "<br/>")
     # We have to check if the entry contains hyperlinks or redirects
-    found_bkz = re.search(r'(bkz: .*)', real_find_string, re.M | re.I)
-    found_hyperlink = re.search(r'[.*]', real_find_string, re.I | re.M)
+    found_bkz = re.search(r"\(bkz: (.*)\)", real_find_string, re.M | re.I)
+    found_hyperlink = re.search(r"\[(.*)\]", real_find_string, re.I | re.M)
     if found_bkz:
-        print('There is bkz in the entry\nConverting...')
-        real_find_string.replace(found_bkz.group(), "(bkz: <a class=\"b\" href=\"/?q="
+        # print('There is bkz in the entry\nConverting...')
+        real_find_string = real_find_string.replace(found_bkz.group(), "(bkz: <a class=\"b\" href=\"/?q="
                                  + found_bkz.group(1).replace(" ", "+")
-                                 + "\">" + "<a/>)")
+                                 + "\">" + found_bkz.group(1)+"<a/>)")
     if found_hyperlink:
-        print('There is a hyperlink in the entry\nConverting...')
-        real_find_string.replace(found_hyperlink.group(), "<a rel=\"nofollow noopener\""
+        # print('There is a hyperlink in the entry\nConverting...')
+        real_find_string = real_find_string.replace("[","")
+        real_find_string = real_find_string.replace("]","")
+        real_find_string = real_find_string.replace(found_hyperlink.group(1), "<a rel=\"nofollow noopener\""
                                                           " class=\"url\" target=\"_blank\" href=\"" +
                                  found_hyperlink.group(1).split(' ')[0] + "\" title=\"" + found_hyperlink.group(1).split(' ')[0] + "\">" +
                                  found_hyperlink.group(1).split(' ')[1]+"<a/>")
-    print(real_find_string)
-    sys.exit(0)
     found_id = response_html.find(user_data.entry)
     if found_id is not -1:
         browser.close()
