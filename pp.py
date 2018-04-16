@@ -113,7 +113,7 @@ def check_if_entry_is_given(response_html, user_data, browser):
         browser.close()
         print('Already entered an entry')
         sys.exit(1)
-    sys.exit(1)
+    #sys.exit(1)
 
 
 def check_first_entry(response_html, browser):
