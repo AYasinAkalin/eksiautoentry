@@ -94,27 +94,26 @@ def check_if_entry_is_given(response_html, user_data, browser):
     real_find_string = real_find_string.replace("<","&lt;")
     real_find_string = real_find_string.replace("\n", "<br/>")
     # We have to check if the entry contains hyperlinks or redirects
-    found_bkz = re.search(r"\(bkz: (.*)\)", real_find_string, re.M | re.I)
-    found_hyperlink = re.search(r"\[(.*)\]", real_find_string, re.I | re.M)
-    if found_bkz:
-        # print('There is bkz in the entry\nConverting...')
-        real_find_string = real_find_string.replace(found_bkz.group(), "(bkz: <a class=\"b\" href=\"/?q="
-                                 + found_bkz.group(1).replace(" ", "+")
-                                 + "\">" + found_bkz.group(1)+"<a/>)")
-    if found_hyperlink:
-        # print('There is a hyperlink in the entry\nConverting...')
-        real_find_string = real_find_string.replace("[","")
-        real_find_string = real_find_string.replace("]","")
-        real_find_string = real_find_string.replace(found_hyperlink.group(1), "<a rel=\"nofollow noopener\""
+    for found_bkz in re.findall(r"\(bkz: (.*)\)", real_find_string, re.M | re.I):
+        real_find_string = real_find_string.replace(found_bkz, "(bkz: <a class=\"b\" href=\"/?q="
+                                 + found_bkz.replace(" ", "+")
+                                 + "\">" + found_bkz+"</a>)")
+        real_find_string = real_find_string.replace("(bkz: (","(")
+        real_find_string = real_find_string.replace("</a>))","</a>)")
+    for found_hyperlink in re.findall(r"\[(.*)\]", real_find_string, re.I | re.M):
+        real_find_string = real_find_string.replace(found_hyperlink, "<a rel=\"nofollow noopener\""
                                                           " class=\"url\" target=\"_blank\" href=\"" +
-                                 found_hyperlink.group(1).split(' ')[0] + "\" title=\"" + found_hyperlink.group(1).split(' ')[0] + "\">" +
-                                 found_hyperlink.group(1).split(' ')[1]+"<a/>")
-    found_id = response_html.find(user_data.entry)
+                                 found_hyperlink.split(' ')[0] + "\" title=\"" + found_hyperlink.split(' ')[0] + "\">" +
+                                 found_hyperlink.split(' ')[1]+"</a>")
+        real_find_string = real_find_string.replace("[<a rel","<a rel")
+        real_find_string = real_find_string.replace("</a>]","</a>")
+    found_id = response_html.find(real_find_string)
+    #print(real_find_string)
     if found_id is not -1:
         browser.close()
         print('Already entered an entry')
         sys.exit(1)
-
+    sys.exit(1)
 
 
 def check_first_entry(response_html, browser):
